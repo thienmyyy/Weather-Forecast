@@ -3,12 +3,28 @@
      <head>
         <meta charset="utf-8">
         <title>Weather Forecast</title>
+        <script src="app.js"></script>
     </head>
     <body>
         <header>
-            <h1>Weather Forecast</h1>
+            <h1 id="city-name">Berlin, DE</h1>
         </header>
         <main>
-            
+            <p id="date">today, 15.05.2025</p>
+            <h2 id="week-day">Monday</h2>
+            <img id="weather-icon" src="" alt="weather icon">
+            <p id="weather-state">sunny</p>
+            <h2 id="max-temp">23°</h2>
+            <p id="min-temp">11°</p>
+            <p>Humidity:<br>
+                Wind:<br>
+                UV INDEX:
+            </p>
+            <p id="humidity-value">33%</p>
+            <p id="wind-value">18 km/h NW</p>
+            <p id="uv-index-value">5</p>
+            <p>Temperature throughout the day:</p>
+            <input type="text" id="city" name="city" placeholder="search another city">
+           <div id="forecast"></div>
         </main>
     </body>
