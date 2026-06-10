@@ -3,10 +3,15 @@
      <head>
         <meta charset="utf-8">
         <title>Weather Forecast</title>
-        <script src="app.js"></script>
+        <script src="app.js" defer></script>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <header>
+            <div class="search-wrapper">
+                <input type="text" id="new-city" name="city" placeholder="search another city">
+                <div id="city-suggestions"></div>
+            </div>
             <h1 id="city-name">Berlin, DE</h1>
         </header>
         <main>
@@ -14,7 +19,8 @@
             <h2 id="week-day">Monday</h2>
             <img id="weather-icon" src="" alt="weather icon">
             <p id="weather-state">sunny</p>
-            <h2 id="max-temp">23°</h2>
+            <h2 id="current-temp">20°</h2>
+            <p id="max-temp">23°</p>
             <p id="min-temp">11°</p>
             <p>Humidity:<br>
                 Wind:<br>
@@ -24,7 +30,7 @@
             <p id="wind-value">18 km/h NW</p>
             <p id="uv-index-value">5</p>
             <p>Temperature throughout the day:</p>
-            <input type="text" id="city" name="city" placeholder="search another city">
            <div id="forecast"></div>
         </main>
+        <div id="toast"></div>
     </body>

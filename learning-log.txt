@@ -3,7 +3,29 @@ What I tried:
 What worked:
 What I learned:
 
-What confused me:
-What I tried:
-What worked:
+1. 
+What confused me: how to change the city inside the fetch url
+What I tried: update the url anytime a new city is searched on a separate function
+What I learned: 
+- I just needed to pass city into getWeather() as a parameter
+- also I used double quotes ("") instead of backticks (``)
+    -> js only does template literal interpolation inside backsticks
+
+2.
+What confused me: when i typed in a new city in the search new city input, I did not get the new city 
+What worked: defer inside the <script> tag
+What I learned: 
+    Without defer, the browser would first read the script file before it even read the body.
+    So when the browser reads the script first, the new city input which is after the script tag does not exist yet.
+    Adding defer tells the browser to download the script in parallel but only execute it after the HTML is fully parsed.
+
+
+3. 
 What I learned:
+- data.cod !== 200 check — the OpenWeatherMap API returns a cod field.
+   When a city isn't found it sends back cod: "404" instead of crashing.
+   This catches that and shows "City not found" in the city name
+  element.
+  - try/catch — wraps the whole fetch so if the network fails entirely
+  (no internet, API down), it shows "Something went wrong" instead of a
+  silent crash.

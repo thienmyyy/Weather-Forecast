@@ -1,26 +1,107 @@
-async function getWeather(){
-    const response = await fetch("https://api.openweathermap.org/data/2.5/weather?q=Berlin&units=metric&appid=8493b0abb29d2e9505ec48c951c7b5cc");
-  const data = await response.json();
-  console.log(data);
+const API_KEY = "8493b0abb29d2e9505ec48c951c7b5cc";
+const newCity = document.getElementById("new-city");
+const suggestionsBox = document.getElementById("city-suggestions");
 
-document.getElementById("city-name").textContent= data.name + ", " + data.sys.country;
-document.getElementById("weather-state").textContent= data.weather[0].description;
-document.getElementById("max-temp").textContent= data.main.temp_max +"°";
-document.getElementById("min-temp").textContent= data.main.temp_min+"°";
-//document.getElementById("weather-icon").textContent= data.weather[0].icon;
-document.getElementById("humidity-value").textContent= data.main.humidity +"%";
-
-}
-
-getWeather();
-
-const forecast = [ 
-    {day: "Mon", icon:"sunny", high: 23, low: 11 },
-    {day: "Tue", icon:"partly-cloudy", high: 18, low: 12},
-    {day: "Wed", icon:"rainy", high: 18, low: 12},
-    {day: "Thu", icon:"snowy", high: 18, low: 12},
-    {day: "Fri", icon:"stromy", high: 18, low: 12},
-    {day: "Sat", icon:"windy", high: 18, low: 12},
-    {day: "Sun", icon:"cloudy", high: 18, low: 12}
+const forecast = [
+  {day: "Mon", icon:"sunny", high: 23, low: 11 },
+  {day: "Tue", icon:"partly-cloudy", high: 18, low: 12},
+  {day: "Wed", icon:"rainy", high: 18, low: 12},
+  {day: "Thu", icon:"snowy", high: 18, low: 12},
+  {day: "Fri", icon:"stromy", high: 18, low: 12},
+  {day: "Sat", icon:"windy", high: 18, low: 12},
+  {day: "Sun", icon:"cloudy", high: 18, low: 12}
 ];
 
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+function showSuggestions(cities) {
+  suggestionsBox.innerHTML = "";
+  cities.forEach(city => {
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    if (city.state) {
+    item.textContent = city.name + ", " + city.state + ", " + city.country;
+    } else {
+        item.textContent = city.name + ", " + city.country;
+    }
+    item.addEventListener("click", () => {
+      hideSuggestions();
+      newCity.value = "";
+      getWeather(city.lat, city.lon);
+    });
+    suggestionsBox.appendChild(item);
+  });
+  suggestionsBox.style.display = "block";
+}
+
+function hideSuggestions() {
+  suggestionsBox.style.display = "none";
+  suggestionsBox.innerHTML = "";
+}
+
+async function searchCity(query) {
+  if (!query) return;
+  try {
+    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${API_KEY}`);
+    const results = await response.json();
+
+    if (results.length === 0) {
+      showToast("City not found");
+      return;
+    }
+
+    if (results.length === 1) {
+      getWeather(results[0].lat, results[0].lon);
+      return;
+    }
+
+    showSuggestions(results);
+  } catch (error) {
+    showToast("Something went wrong");
+  }
+}
+
+async function getWeather(lat, lon) {
+  try {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+    const data = await response.json();
+    console.log(data);
+
+    if (data.cod != 200) {
+      showToast("City not found");
+      return;
+    }
+
+    newCity.value = "";
+    document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
+    document.getElementById("weather-state").textContent = data.weather[0].description;
+    document.getElementById("curent-temp").textContent = data.main.temp + "°";
+    document.getElementById("max-temp").textContent = data.main.temp_max + "°";
+    document.getElementById("min-temp").textContent = data.main.temp_min + "°";
+    document.getElementById("humidity-value").textContent = data.main.humidity + "%";
+    document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) +" km/h";
+  } catch (error) {
+    showToast("Something went wrong");
+  }
+}
+
+getWeather(52.5244, 13.4105);
+
+newCity.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    const cityInput = newCity.value.trim();
+    hideSuggestions();
+    searchCity(cityInput);
+  }
+});
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".search-wrapper")) {
+    hideSuggestions();
+  }
+});

@@ -1,0 +1,45 @@
+.search-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#city-suggestions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.suggestion-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    color: #333;
+}
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+
+#toast {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    background: #e60d0d;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+#toast.show {
+    opacity: 1;
+}
