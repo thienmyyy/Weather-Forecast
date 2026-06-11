@@ -12,96 +12,109 @@ const forecast = [
   {day: "Sun", icon:"cloudy", high: 18, low: 12}
 ];
 
+function formatLocalDate(dt, offset) {
+    const date = new Date((offset + dt) * 1000);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    document.getElementById("date").textContent = day + "." + month + "." + year;
+}
+
+function getWeekday(dt, offset) {
+    const date = new Date((offset + dt) * 1000);
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    document.getElementById("week-day").textContent = days[date.getUTCDay()];
+}
+
 function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 2000);
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
 }
 
 function showSuggestions(cities) {
-  suggestionsBox.innerHTML = "";
-  cities.forEach(city => {
-    const item = document.createElement("div");
-    item.className = "suggestion-item";
-    if (city.state) {
-    item.textContent = city.name + ", " + city.state + ", " + city.country;
-    } else {
-        item.textContent = city.name + ", " + city.country;
-    }
-    item.addEventListener("click", () => {
-      hideSuggestions();
-      newCity.value = "";
-      getWeather(city.lat, city.lon);
+    suggestionsBox.innerHTML = "";
+    cities.forEach(city => {
+        const item = document.createElement("div");
+        item.className = "suggestion-item";
+        if (city.state) {
+            item.textContent = city.name + ", " + city.state + ", " + city.country;
+        } else {
+            item.textContent = city.name + ", " + city.country;
+        }
+        item.addEventListener("click", () => {
+            hideSuggestions();
+            newCity.value = "";
+            getWeather(city.lat, city.lon);
+        });
+        suggestionsBox.appendChild(item);
     });
-    suggestionsBox.appendChild(item);
-  });
-  suggestionsBox.style.display = "block";
+    suggestionsBox.style.display = "block";
 }
 
 function hideSuggestions() {
-  suggestionsBox.style.display = "none";
-  suggestionsBox.innerHTML = "";
+    suggestionsBox.style.display = "none";
+    suggestionsBox.innerHTML = "";
 }
 
 async function searchCity(query) {
-  if (!query) return;
-  try {
-    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${API_KEY}`);
-    const results = await response.json();
+    if (!query) return;
+    try {
+        const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${API_KEY}`);
+        const results = await response.json();
 
-    if (results.length === 0) {
-      showToast("City not found");
-      return;
+        if (results.length === 0) {
+            showToast("City not found");
+            return;
+        }
+
+        if (results.length === 1) {
+            getWeather(results[0].lat, results[0].lon);
+            return;
+        }
+
+        showSuggestions(results);
+    } catch (error) {
+        showToast("Something went wrong");
     }
-
-    if (results.length === 1) {
-      getWeather(results[0].lat, results[0].lon);
-      return;
-    }
-
-    showSuggestions(results);
-  } catch (error) {
-    showToast("Something went wrong");
-  }
 }
 
 async function getWeather(lat, lon) {
-  try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
-    const data = await response.json();
-    console.log(data);
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+        const data = await response.json();
 
-    if (data.cod != 200) {
-      showToast("City not found");
-      return;
+        if (data.cod != 200) {
+            showToast("City not found");
+            return;
+        }
+
+        newCity.value = "";
+        formatLocalDate(data.dt, data.timezone);
+        getWeekday(data.dt, data.timezone);
+        document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
+        document.getElementById("weather-state").textContent = data.weather[0].description;
+        document.getElementById("current-temp").textContent = data.main.temp + "°";
+        document.getElementById("max-temp").textContent = data.main.temp_max + "°";
+        document.getElementById("min-temp").textContent = data.main.temp_min + "°";
+        document.getElementById("humidity-value").textContent = data.main.humidity + "%";
+        document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
+    } catch (error) {
+        showToast("Something went wrong");
     }
-
-    newCity.value = "";
-    document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
-    document.getElementById("weather-state").textContent = data.weather[0].description;
-    document.getElementById("curent-temp").textContent = data.main.temp + "°";
-    document.getElementById("max-temp").textContent = data.main.temp_max + "°";
-    document.getElementById("min-temp").textContent = data.main.temp_min + "°";
-    document.getElementById("humidity-value").textContent = data.main.humidity + "%";
-    document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) +" km/h";
-  } catch (error) {
-    showToast("Something went wrong");
-  }
 }
-
-getWeather(52.5244, 13.4105);
-
 newCity.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    const cityInput = newCity.value.trim();
-    hideSuggestions();
-    searchCity(cityInput);
-  }
+    if (e.key === "Enter") {
+        hideSuggestions();
+        searchCity(newCity.value.trim());
+    }
 });
 
 document.addEventListener("click", function(e) {
-  if (!e.target.closest(".search-wrapper")) {
-    hideSuggestions();
-  }
+    if (!e.target.closest(".search-wrapper")) {
+        hideSuggestions();
+    }
 });
+
+getWeather(52.5244, 13.4105); // delete later when start.html is functional
