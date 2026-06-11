@@ -29,3 +29,11 @@ What I learned:
   - try/catch — wraps the whole fetch so if the network fails entirely
   (no internet, API down), it shows "Something went wrong" instead of a
   silent crash.
+
+4. formatLocalDate() function
+What confused me: That OpenWeatherMap hands back the timezone as a raw number of seconds (7200), not a name like 'Europe/Berlin' — and that you can't feed that number into the timeZone option.
+What I tried: Adding the offset to getUTCDate() + 1 and multiplying by 1000 — mixing seconds with a day number, which produced garbage.
+What worked: Shift the timestamp first (dt + offset, both in seconds) → × 1000 → new Date(...) → read with the getUTC* methods → pad each piece → assemble with dots.
+What I learned:
+ - padStart is a String method that pads the front up to a total target length — so it belongs on each short piece (wrapped in String(...)), not on the finished string.
+ - The getUTC* methods ignore the viewer's machine, so shifting the timestamp by the offset and then reading with getUTC* pins the result to the queried city
