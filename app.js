@@ -117,4 +117,11 @@ document.addEventListener("click", function(e) {
     }
 });
 
-getWeather(52.5244, 13.4105); // delete later when start.html is functional
+const selectedCity = sessionStorage.getItem("city");
+if (selectedCity){
+    searchCity(selectedCity);
+    sessionStorage.removeItem("city");
+}
+else{
+    getWeather(52.5244, 13.4105);
+}
