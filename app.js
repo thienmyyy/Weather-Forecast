@@ -1,6 +1,7 @@
 const API_KEY = "8493b0abb29d2e9505ec48c951c7b5cc";
 const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
+let pendingCityName = null;
 
 const forecast = [
   {day: "Mon", icon:"sunny", high: 23, low: 11 },
@@ -46,6 +47,7 @@ function showSuggestions(cities) {
         item.addEventListener("click", () => {
             hideSuggestions();
             newCity.value = "";
+            pendingCityName = city.name + ", " + city.country;
             getWeather(city.lat, city.lon);
         });
         suggestionsBox.appendChild(item);
@@ -69,12 +71,16 @@ async function searchCity(query) {
             return;
         }
 
-        if (results.length === 1) {
-            getWeather(results[0].lat, results[0].lon);
+        const unique = results.filter((city, index) => {
+            return results.findIndex(c => c.name === city.name && c.country === city.country) === index;
+        });
+
+        if (unique.length === 1) {
+            getWeather(unique[0].lat, unique[0].lon);
             return;
         }
 
-        showSuggestions(results);
+        showSuggestions(unique);
     } catch (error) {
         showToast("Something went wrong");
     }
@@ -93,7 +99,13 @@ async function getWeather(lat, lon) {
         newCity.value = "";
         formatLocalDate(data.dt, data.timezone);
         getWeekday(data.dt, data.timezone);
+        if(pendingCityName){
+        document.getElementById("city-name").textContent = pendingCityName;
+        } 
+        else{
         document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
+        }
+        pendingCityName = null;
         document.getElementById("weather-state").textContent = data.weather[0].description;
         document.getElementById("current-temp").textContent = data.main.temp + "°";
         document.getElementById("max-temp").textContent = data.main.temp_max + "°";
@@ -117,11 +129,12 @@ document.addEventListener("click", function(e) {
     }
 });
 
-const selectedCity = sessionStorage.getItem("city");
-if (selectedCity){
-    searchCity(selectedCity);
-    sessionStorage.removeItem("city");
-}
-else{
+const selectedLat = sessionStorage.getItem("lat");
+const selectedLon = sessionStorage.getItem("lon");
+if (selectedLat && selectedLon) {
+    sessionStorage.removeItem("lat");
+    sessionStorage.removeItem("lon");
+    getWeather(selectedLat, selectedLon);
+} else {
     getWeather(52.5244, 13.4105);
 }

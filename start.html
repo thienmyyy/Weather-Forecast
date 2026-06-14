@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <title>Weather Forecast Starting Page</title>
         <script src="script.js" defer></script>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <header>
@@ -14,8 +15,10 @@
                 Type in your city
             </h2>
             <img src="" alt="sun">
-            <input type="text" id="city" name="city" placeholder="e.g. Berlin">
-            <div id="city-suggestions"></div>
+            <div class="search-wrapper">
+                <input type="text" id="city" name="city" placeholder="e.g. Berlin" autocomplete="off">
+                <div id="city-suggestions"></div>
+            </div>
             <button id="search-btn">Ok</button>
 
         </main>
