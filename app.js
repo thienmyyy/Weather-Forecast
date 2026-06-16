@@ -3,8 +3,6 @@ const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
 let pendingCityName = null;
 let debounceTimer = null;
-let selLat = null;
-let selLon = null;
 
 const forecast = [
   {day: "Mon", icon:"sunny", high: 23, low: 11 },
@@ -21,7 +19,7 @@ function formatLocalDate(dt, offset) {
     const day = String(date.getUTCDate()).padStart(2, '0');
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');
     const year = date.getUTCFullYear();
-    document.getElementById("date").textContent = day + "." + month + "." + year;
+    document.getElementById("date").textContent = "today, " + day + "." + month + "." + year;
 }
 
 function getWeekday(dt, offset) {
@@ -123,9 +121,9 @@ async function getWeather(lat, lon) {
 }
 newCity.addEventListener("input", function(e) {
     clearTimeout(debounceTimer);
-    selLat = null;
-    selLon = null;
     if (newCity.value.trim() == ""){
+        selectedLat = null;
+        selectedLon = null;
         hideSuggestions();
     }
     else{
@@ -139,8 +137,8 @@ document.addEventListener("click", function(e) {
     }
 });
 
-const selectedLat = sessionStorage.getItem("lat");
-const selectedLon = sessionStorage.getItem("lon");
+let selectedLat = sessionStorage.getItem("lat");
+let selectedLon = sessionStorage.getItem("lon");
 if (selectedLat && selectedLon) {
     sessionStorage.removeItem("lat");
     sessionStorage.removeItem("lon");
