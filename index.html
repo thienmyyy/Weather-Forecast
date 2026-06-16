@@ -8,29 +8,40 @@
     </head>
     <body>
         <header>
+            <h1 id="city-name">Berlin, DE</h1>
             <div class="search-wrapper">
                 <input type="text" id="new-city" name="city" placeholder="search another city" autocomplete="off">
                 <div id="city-suggestions"></div>
             </div>
-            <h1 id="city-name">Berlin, DE</h1>
         </header>
         <main>
-            <p id="date">today, 15.05.2025</p>
-            <h2 id="week-day">Monday</h2>
-            <img id="weather-icon" src="" alt="weather icon">
-            <p id="weather-state">sunny</p>
-            <h2 id="current-temp">20°</h2>
-            <p id="max-temp">23°</p>
-            <p id="min-temp">11°</p>
-            <p>Humidity:<br>
-                Wind:<br>
-                UV INDEX:
-            </p>
-            <p id="humidity-value">33%</p>
-            <p id="wind-value">18 km/h NW</p>
-            <p id="uv-index-value">5</p>
-            <p>Temperature throughout the day:</p>
-           <div id="forecast"></div>
+            <div class="layout">
+                <section class="weather-card">
+                    <p id="date">15.05.2025</p>
+                    <h2 id="week-day">Monday</h2>
+                    <img id="weather-icon" src="" alt="weather icon">
+                    <p id="weather-state">sunny</p>
+                    <h2 id="current-temp">20°</h2>
+                    <p id="max-temp">23°</p>
+                    <p id="min-temp">11°</p>
+                    <p>Humidity:</p>
+                    <p id="humidity-value">33%</p>
+                    <p>Wind:</p>
+                    <p id="wind-value">18 km/h</p>
+                    <p>UV Index:</p>
+                    <p id="uv-index-value">5</p>
+                </section>
+                <aside class="forecast-sidebar">
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                    <div class="forecast-card"></div>
+                </aside>
+            </div>
         </main>
         <div id="toast"></div>
     </body>
+</html>
