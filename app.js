@@ -2,6 +2,9 @@ const API_KEY = "8493b0abb29d2e9505ec48c951c7b5cc";
 const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
 let pendingCityName = null;
+let debounceTimer = null;
+let selLat = null;
+let selLon = null;
 
 const forecast = [
   {day: "Mon", icon:"sunny", high: 23, low: 11 },
@@ -48,7 +51,9 @@ function showSuggestions(cities) {
             hideSuggestions();
             newCity.value = "";
             pendingCityName = city.name + ", " + city.country;
-            getWeather(city.lat, city.lon);
+            selectedLat = city.lat;
+            selectedLon = city.lon;
+            getWeather(selectedLat, selectedLon);
         });
         suggestionsBox.appendChild(item);
     });
@@ -116,10 +121,15 @@ async function getWeather(lat, lon) {
         showToast("Something went wrong");
     }
 }
-newCity.addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
+newCity.addEventListener("input", function(e) {
+    clearTimeout(debounceTimer);
+    selLat = null;
+    selLon = null;
+    if (newCity.value.trim() == ""){
         hideSuggestions();
-        searchCity(newCity.value.trim());
+    }
+    else{
+    debounceTimer = setTimeout(() => (searchCity(newCity.value.trim())), 300);
     }
 });
 
