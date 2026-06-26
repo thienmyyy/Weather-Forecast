@@ -70,7 +70,6 @@ async function searchCity(query) {
         const results = await response.json();
 
         if (results.length === 0) {
-            showToast("City not found");
             return;
         }
 
@@ -84,6 +83,16 @@ async function searchCity(query) {
         }
 
         showSuggestions(unique);
+    } catch (error) {
+        showToast("Something went wrong");
+    }
+}
+
+async function getForecast(lat, lon) {
+    try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`);
+        const data = await response.json();
+        return data.daily;
     } catch (error) {
         showToast("Something went wrong");
     }
@@ -110,15 +119,33 @@ async function getWeather(lat, lon) {
         }
         pendingCityName = null;
         document.getElementById("weather-state").textContent = data.weather[0].description;
-        document.getElementById("current-temp").textContent = data.main.temp + "°";
-        document.getElementById("max-temp").textContent = data.main.temp_max + "°";
-        document.getElementById("min-temp").textContent = data.main.temp_min + "°";
+        document.getElementById("current-temp").textContent = data.main.temp + " °C";
+        document.getElementById("max-temp").textContent = data.main.temp_max + " °";
+        document.getElementById("min-temp").textContent = data.main.temp_min + " °";
         document.getElementById("humidity-value").textContent = data.main.humidity + "%";
         document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
+
+        const daily = await getForecast(lat, lon);
+        renderForecast(daily);
     } catch (error) {
         showToast("Something went wrong");
-    }
+
 }
+}
+
+function renderForecast (daily){
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const cards = document.querySelectorAll(".forecast-card");
+
+    daily.time.forEach((time, i) => {
+    if (!cards[i]) return;
+    const date = new Date(time);
+    const dayName = dayNames[date.getUTCDay()];
+    cards[i].textContent = dayName;
+    }); 
+
+}
+
 newCity.addEventListener("input", function(e) {
     clearTimeout(debounceTimer);
     if (newCity.value.trim() == ""){

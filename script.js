@@ -37,7 +37,6 @@ async function searchCity(query){
         const results = await response.json();
 
         if (results.length === 0) {
-            alert("City not found");
             return;
         }
         else{
