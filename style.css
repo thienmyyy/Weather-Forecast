@@ -1,3 +1,8 @@
+:root{
+    --heading-size: 2rem;
+}
+
+
 .search-wrapper {
     position: relative;
     display: inline-block;
@@ -42,4 +47,52 @@
 
 #toast.show {
     opacity: 1;
+}
+
+body{
+    background-color: #F7F791;
+    padding: 12px;
+}
+
+.layout{
+    display: flex;
+    gap: 24px;
+}
+
+.weather-card{
+    background-color: #FFFFCB;
+    border-radius: 12px;
+    border: 1.5px solid #000000;
+}
+
+.forecast-card{
+    background-color: #FFFFCB;
+    border-radius: 10px;
+    border: 1.5px solid #000000;
+}
+
+.forecast-card:first-child {
+      background-color: #EFC977;
+      border: 2px solid #000000;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.853)
+  }
+
+#new-city{
+    background-color: #FFFFCB;
+    border-radius: 999px;
+    border: 1.5px solid #000000;
+    padding: 8px 20px;
+    width: 150px;
+}
+
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1{
+    font-size: var(--heading-size);
+    font-weight: bold;
+    margin: 0;
 }
