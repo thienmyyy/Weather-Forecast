@@ -3,16 +3,31 @@ const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
 let pendingCityName = null;
 let debounceTimer = null;
-
-const forecast = [
-  {day: "Mon", icon:"sunny", high: 23, low: 11 },
-  {day: "Tue", icon:"partly-cloudy", high: 18, low: 12},
-  {day: "Wed", icon:"rainy", high: 18, low: 12},
-  {day: "Thu", icon:"snowy", high: 18, low: 12},
-  {day: "Fri", icon:"stromy", high: 18, low: 12},
-  {day: "Sat", icon:"windy", high: 18, low: 12},
-  {day: "Sun", icon:"cloudy", high: 18, low: 12}
-];
+ const weatherIcons = {
+      0: "icons/sunny.svg",
+      1: "icons/sunny.svg",
+      2: "icons/partly-cloudy.svg",
+      3: "icons/cloudy.svg",
+      45: "icons/cloudy.svg",
+      48: "icons/cloudy.svg",
+      51: "icons/rainy.svg", 
+      53: "icons/rainy.svg", 
+      55: "icons/rainy.svg",
+      61: "icons/rainy.svg", 
+      63: "icons/rainy.svg", 
+      65: "icons/rainy.svg",
+      71: "icons/snowy.svg", 
+      73: "icons/snowy.svg", 
+      75: "icons/snowy.svg",
+      80: "icons/rainy.svg", 
+      81: "icons/rainy.svg", 
+      82: "icons/rainy.svg",
+      85: "icons/snowy.svg", 
+      86: "icons/snowy.svg",
+      95: "icons/stormy.svg", 
+      96: "icons/stormy.svg", 
+      99: "icons/stormy.svg"
+  };
 
 function formatLocalDate(dt, offset) {
     const date = new Date((offset + dt) * 1000);
@@ -90,7 +105,7 @@ async function searchCity(query) {
 
 async function getForecast(lat, lon) {
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`);
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,uv_index_max,weathercode&timezone=auto`);
         const data = await response.json();
         return data.daily;
     } catch (error) {
@@ -98,10 +113,23 @@ async function getForecast(lat, lon) {
     }
 }
 
+function renderForecast (daily){
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const cards = document.querySelectorAll(".forecast-card");
+
+    daily.time.forEach((time, i) => {
+    if (!cards[i]) return;
+    const date = new Date(time);
+    const dayName = dayNames[date.getUTCDay()];
+    cards[i].innerHTML = dayName + ` <img src="${weatherIcons[daily.weathercode[i]]}">` +  daily.temperature_2m_max[i] + "° " + daily.temperature_2m_min[i] + "°";
+    });
+}
+
 async function getWeather(lat, lon) {
     try {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
         const data = await response.json();
+        const daily = await getForecast(lat, lon);
 
         if (data.cod != 200) {
             showToast("City not found");
@@ -119,31 +147,17 @@ async function getWeather(lat, lon) {
         }
         pendingCityName = null;
         document.getElementById("weather-state").textContent = data.weather[0].description;
-        document.getElementById("current-temp").textContent = data.main.temp + " °C";
-        document.getElementById("max-temp").textContent = data.main.temp_max + " °";
-        document.getElementById("min-temp").textContent = data.main.temp_min + " °";
+        document.getElementById("current-temp").textContent = data.main.temp + "°C";
+        document.getElementById("max-temp").textContent = data.main.temp_max + "°";
+        document.getElementById("min-temp").textContent = data.main.temp_min + "°";
         document.getElementById("humidity-value").textContent = data.main.humidity + "%";
         document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
-
-        const daily = await getForecast(lat, lon);
+        document.getElementById("weather-icon").src = weatherIcons[daily.weathercode[0]];
+       document.getElementById("uv-index-value").textContent = daily.uv_index_max[0];
         renderForecast(daily);
     } catch (error) {
         showToast("Something went wrong");
-
 }
-}
-
-function renderForecast (daily){
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const cards = document.querySelectorAll(".forecast-card");
-
-    daily.time.forEach((time, i) => {
-    if (!cards[i]) return;
-    const date = new Date(time);
-    const dayName = dayNames[date.getUTCDay()];
-    cards[i].textContent = dayName;
-    }); 
-
 }
 
 newCity.addEventListener("input", function(e) {
