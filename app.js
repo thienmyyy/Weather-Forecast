@@ -121,9 +121,9 @@ function renderForecast (daily){
     if (!cards[i]) return;
     const date = new Date(time);
     const dayName = dayNames[date.getUTCDay()];
-    cards[i].innerHTML = dayName + ` <img src="${weatherIcons[daily.weathercode[i]]}">` +  daily.temperature_2m_max[i] + "° " + daily.temperature_2m_min[i] + "°";
+    cards[i].innerHTML = `<strong>${dayName.slice(0, 3)}</strong>` + ` <img src="${weatherIcons[daily.weathercode[i]]}">` +  `<strong>${Math.round(daily.temperature_2m_max[i])}</strong>` + "° " + Math.round(daily.temperature_2m_min[i]) + "°";
     });
-}
+}   
 
 async function getWeather(lat, lon) {
     try {
