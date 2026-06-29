@@ -37,3 +37,5 @@ What worked: Shift the timestamp first (dt + offset, both in seconds) → × 100
 What I learned:
  - padStart is a String method that pads the front up to a total target length — so it belongs on each short piece (wrapped in String(...)), not on the finished string.
  - The getUTC* methods ignore the viewer's machine, so shifting the timestamp by the offset and then reading with getUTC* pins the result to the queried city
+
+ 

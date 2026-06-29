@@ -3,6 +3,7 @@ const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
 let pendingCityName = null;
 let debounceTimer = null;
+let drawChart = null
  const weatherIcons = {
       0: "icons/sunny.svg",
       1: "icons/sunny.svg",
@@ -105,31 +106,31 @@ async function searchCity(query) {
 
 async function getForecast(lat, lon) {
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,uv_index_max,weathercode&timezone=auto`);
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min,uv_index_max,weathercode&timezone=auto`);
         const data = await response.json();
-        return data.daily;
+        return {daily:data.daily, chart:data.hourly}; 
     } catch (error) {
         showToast("Something went wrong");
     }
 }
 
-function renderForecast (daily){
+function renderForecast(daily) {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const cards = document.querySelectorAll(".forecast-card");
+    const cards= document.querySelectorAll(".forecast-card");
 
     daily.time.forEach((time, i) => {
-    if (!cards[i]) return;
-    const date = new Date(time);
-    const dayName = dayNames[date.getUTCDay()];
-    cards[i].innerHTML = `<strong>${dayName.slice(0, 3)}</strong>` + ` <img src="${weatherIcons[daily.weathercode[i]]}">` +  `<strong>${Math.round(daily.temperature_2m_max[i])}</strong>` + "° " + Math.round(daily.temperature_2m_min[i]) + "°";
+        if (!cards[i]) return;
+        const date = new Date(time);
+        const dayName = dayNames[date.getUTCDay()];
+        cards[i].innerHTML = `<span class="fc-day">${dayName.slice(0, 3)}</span><img src="${weatherIcons[daily.weathercode[i]]}" alt=""><span class="fc-high">${Math.round(daily.temperature_2m_max[i])}°</span><span class="fc-low">${Math.round(daily.temperature_2m_min[i])}°</span>`;
     });
-}   
+}
 
 async function getWeather(lat, lon) {
     try {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
         const data = await response.json();
-        const daily = await getForecast(lat, lon);
+        const {daily,chart} = await getForecast(lat, lon);
 
         if (data.cod != 200) {
             showToast("City not found");
@@ -147,17 +148,39 @@ async function getWeather(lat, lon) {
         }
         pendingCityName = null;
         document.getElementById("weather-state").textContent = data.weather[0].description;
-        document.getElementById("current-temp").textContent = data.main.temp + "°C";
-        document.getElementById("max-temp").textContent = data.main.temp_max + "°";
-        document.getElementById("min-temp").textContent = data.main.temp_min + "°";
+        document.getElementById("current-temp").textContent = Math.round(data.main.temp) + "°C";
+        document.getElementById("max-temp").textContent = Math.round(data.main.temp_max) + "°";
+        document.getElementById("min-temp").textContent = Math.round(data.main.temp_min) + "°";
         document.getElementById("humidity-value").textContent = data.main.humidity + "%";
         document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
         document.getElementById("weather-icon").src = weatherIcons[daily.weathercode[0]];
-       document.getElementById("uv-index-value").textContent = daily.uv_index_max[0];
+       document.getElementById("uv-index-value").textContent = Math.round(daily.uv_index_max[0]);
         renderForecast(daily);
+        renderChart(chart);
     } catch (error) {
         showToast("Something went wrong");
 }
+}
+
+function renderChart(chart){
+    const labels = chart.time.slice(0, 24);
+    const time = labels.map(word => word.slice(11)); 
+    const temps = chart.temperature_2m.slice(0, 24);
+    let tempChart = document.getElementById("temp-chart");
+    let c = tempChart.getContext("2d");
+    if(drawChart){
+        drawChart.destroy();
+    }
+    drawChart = new Chart(c, {
+      type: "line",
+      data: {
+          labels: time,
+          datasets: [{
+              label: "Temperature (°C)",
+              data: temps
+          }]
+      }
+  });
 }
 
 newCity.addEventListener("input", function(e) {

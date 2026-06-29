@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
-     <head>
+    <head>
         <meta charset="utf-8">
         <title>Weather Forecast</title>
         <script src="app.js" defer></script>
+        <script src= "https://cdn.jsdelivr.net/npm/chart.js" defer></script>
         <link rel="stylesheet" href="style.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +12,7 @@
     </head>
     <body>
         <header>
-             <button href="start.html">←</button>
+            <a href="start.html" class="back-btn">←</a>
             <h1 id="city-name">Berlin, DE</h1>
             <div class="search-wrapper">
                 <input type="text" id="new-city" name="city" placeholder="search another city" autocomplete="off">
@@ -21,20 +22,42 @@
         <main>
             <div class="layout">
                 <section class="weather-card">
-                    <p id="date">15.05.2025</p>
-                    <h2 id="week-day">Monday</h2>
-                    <img id="weather-icon" src="" alt="weather icon">
-                    <p id="weather-state">sunny</p>
-                    <h2 id="current-temp">20°</h2>
-                    <p id="max-temp">23°</p>
-                    <p id="min-temp">11°</p>
-                    <p>Humidity:</p>
-                    <p id="humidity-value">33%</p>
-                    <p>Wind:</p>
-                    <p id="wind-value">18 km/h</p>
-                    <p>UV Index:</p>
-                    <p id="uv-index-value">5</p>
-                    <p id="chart">Temperature throughout the day:</p>
+                    <div class="weather-date-block">
+                        <p id="date">today, 15.05.2025</p>
+                        <div class="weekday-row">
+                            <h2 id="week-day">Monday</h2>
+                            <p id="weather-state">sunny</p>
+                        </div>
+                    </div>
+                    <div class="weather-main">
+                        <div class="weather-left">
+                            <img id="weather-icon" src="" alt="weather icon">
+                            <div class="temp-block">
+                                <h2 id="current-temp">20°C</h2>
+                                <p class="max-min-temps">
+                                    <span id="max-temp">23°</span>
+                                    <span id="min-temp">11°</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="weather-divider"></div>
+                        <div class="weather-indicators">
+                            <div class="indicator-row">
+                                <p class="indicator-label">Humidity:</p>
+                                <p class="indicator-value" id="humidity-value">33%</p>
+                            </div>
+                            <div class="indicator-row">
+                                <p class="indicator-label">Wind:</p>
+                                <p class="indicator-value" id="wind-value">18 km/h</p>
+                            </div>
+                            <div class="indicator-row">
+                                <p class="indicator-label">UV INDEX:</p>
+                                <p class="indicator-value" id="uv-index-value">5</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="chart-label">Temperature throughout the day:</p>
+                    <canvas id="temp-chart"></canvas>
                 </section>
                 <aside class="forecast-sidebar">
                     <div class="forecast-card"></div>
