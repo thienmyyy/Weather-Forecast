@@ -172,13 +172,55 @@ function renderChart(chart){
         drawChart.destroy();
     }
     drawChart = new Chart(c, {
-      type: "line",
+      type: "bar",
       data: {
           labels: time,
           datasets: [{
-              label: "Temperature (°C)",
-              data: temps
+            label: "Temperature (°C)",
+            data: temps,
+            backgroundColor: "rgba(245, 168, 74, 0.7)",
+            borderRadius: 8,
+            barPercentage: 0.5,
+            hoverBackgroundColor: "rgba(245, 168, 74, 1)"
           }]
+      },
+      options: {
+        scales: {
+        y: {
+            border:{
+                dash: function(context){
+                    return context.tick.value === 0 ? [] : [8, 10];
+                }
+            },
+            ticks: {
+                font: {
+                    family: "Geist Mono"
+                },
+                callback: function(value){
+                    return value +"°";
+                 },
+                 stepSize: 5
+            }
+        },
+        x: {
+            ticks: {
+                callback: function(value, index) {
+                return index % 6 === 0 ? time[index] : null;
+                },
+                font: {
+                    family: "Geist Mono"
+                }
+            },
+            grid: {
+                display: false
+            }
+        },
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
       }
   });
 }
