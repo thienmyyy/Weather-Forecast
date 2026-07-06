@@ -6,6 +6,14 @@ let debounceTimer = null;
 let drawChart = null
 let colors = null;
 let pinnedIndex = null;
+let selectedIndex = 0;
+let dailyData = null;
+let chartData = null;
+let timezoneOffset = null;
+let currentActualTemp = null;
+let currentHumidity = null;
+let currentWindKmh = null;
+let currentHourGlobal = null;
  const weatherIcons = {
       0: "icons/sunny.svg",
       1: "icons/sunny.svg",
@@ -27,23 +35,59 @@ let pinnedIndex = null;
       82: "icons/rainy.svg",
       85: "icons/snowy.svg", 
       86: "icons/snowy.svg",
-      95: "icons/stormy.svg", 
-      96: "icons/stormy.svg", 
+      95: "icons/stormy.svg",
+      96: "icons/stormy.svg",
       99: "icons/stormy.svg"
   };
 
-function formatLocalDate(dt, offset) {
-    const date = new Date((offset + dt) * 1000);
+const weatherDescriptions = {
+    0: "sunny", 1: "sunny", 2: "partly cloudy", 3: "cloudy", 45: "cloudy", 48: "cloudy",
+    51: "rainy", 53: "rainy", 55: "rainy",
+    61: "rainy", 63: "rainy", 65: "rainy",
+    71: "snowy", 73: "snowy", 75: "snowy",
+    80: "rainy", 81: "rainy", 82: "rainy",
+    85: "snowy", 86: "snowy",
+    95: "stormy", 96: "stormy", 99: "stormy"
+};
+
+function renderDayCard(index) {
+    selectedIndex = index;
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const date = new Date(dailyData.time[index]);
+    const weekday = dayNames[date.getUTCDay()];
     const day = String(date.getUTCDate()).padStart(2, '0');
     const month = String(date.getUTCMonth() + 1).padStart(2, '0');
     const year = date.getUTCFullYear();
-    document.getElementById("date").textContent = "today, " + day + "." + month + "." + year;
-}
+    const formattedDate = day + "." + month + "." + year;
 
-function getWeekday(dt, offset) {
-    const date = new Date((offset + dt) * 1000);
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    document.getElementById("week-day").textContent = days[date.getUTCDay()];
+    document.getElementById("date").textContent = index === 0 ? "today, " + formattedDate : weekday.slice(0, 3) + ", " + formattedDate;
+    document.getElementById("week-day").textContent = weekday;
+    document.getElementById("weather-state").textContent = weatherDescriptions[dailyData.weathercode[index]];
+    document.getElementById("weather-icon").src = weatherIcons[dailyData.weathercode[index]];
+    document.getElementById("max-temp").textContent = Math.round(dailyData.temperature_2m_max[index]) + "°";
+    document.getElementById("min-temp").textContent = Math.round(dailyData.temperature_2m_min[index]) + "°";
+    document.getElementById("uv-index-value").textContent = Math.round(dailyData.uv_index_max[index]);
+
+    const currentTempEl = document.getElementById("current-temp");
+    document.getElementById("max-temp").classList.toggle("headline", index !== 0);
+    if (index === 0) {
+        currentTempEl.style.display = "";
+        currentTempEl.textContent = Math.round(currentActualTemp) + "°C";
+        document.getElementById("humidity-value").textContent = currentHumidity + "%";
+        document.getElementById("wind-value").textContent = currentWindKmh + " km/h";
+    } else {
+        currentTempEl.style.display = "none";
+        document.getElementById("humidity-value").textContent = "–";
+        document.getElementById("wind-value").textContent = "–";
+    }
+
+    document.querySelectorAll(".forecast-card").forEach((card, i) => {
+        card.classList.toggle("selected", i === index);
+    });
+
+    const dayHours = chartData.time.slice(index * 24, index * 24 + 24);
+    const dayTemps = chartData.temperature_2m.slice(index * 24, index * 24 + 24);
+    renderChart({ time: dayHours, temperature_2m: dayTemps }, index === 0 ? currentHourGlobal : null);
 }
 
 function showToast(message) {
@@ -124,7 +168,7 @@ function renderForecast(daily) {
         if (!cards[i]) return;
         const date = new Date(time);
         const dayName = dayNames[date.getUTCDay()];
-        cards[i].innerHTML = `<span class="fc-day">${dayName.slice(0, 3)}</span><img src="${weatherIcons[daily.weathercode[i]]}" alt=""><span class="fc-high">${Math.round(daily.temperature_2m_max[i])}°</span><span class="fc-low">${Math.round(daily.temperature_2m_min[i])}°</span>`;
+        cards[i].innerHTML = `<span class="fc-day">${dayName.slice(0, 3)}</span><img src="${weatherIcons[daily.weathercode[i]]}" alt=""><span class="fc-temps"><span class="fc-high">${Math.round(daily.temperature_2m_max[i])}°</span><span class="fc-low">${Math.round(daily.temperature_2m_min[i])}°</span></span>`;
     });
 }
 
@@ -140,26 +184,24 @@ async function getWeather(lat, lon) {
         }
 
         newCity.value = "";
-        formatLocalDate(data.dt, data.timezone);
-        getWeekday(data.dt, data.timezone);
         if(pendingCityName){
         document.getElementById("city-name").textContent = pendingCityName;
-        } 
+        }
         else{
         document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
         }
         pendingCityName = null;
-        document.getElementById("weather-state").textContent = data.weather[0].description;
-        document.getElementById("current-temp").textContent = Math.round(data.main.temp) + "°C";
-        document.getElementById("max-temp").textContent = Math.round(data.main.temp_max) + "°";
-        document.getElementById("min-temp").textContent = Math.round(data.main.temp_min) + "°";
-        document.getElementById("humidity-value").textContent = data.main.humidity + "%";
-        document.getElementById("wind-value").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
-        document.getElementById("weather-icon").src = weatherIcons[daily.weathercode[0]];
-       document.getElementById("uv-index-value").textContent = Math.round(daily.uv_index_max[0]);
+
+        dailyData = daily;
+        chartData = chart;
+        timezoneOffset = data.timezone;
+        currentActualTemp = data.main.temp;
+        currentHumidity = data.main.humidity;
+        currentWindKmh = Math.round(data.wind.speed * 3.6);
+        currentHourGlobal = new Date((Date.now() / 1000 + data.timezone) * 1000).getUTCHours();
+
         renderForecast(daily);
-        const currentHour = new Date((Date.now() / 1000 + data.timezone) * 1000 ).getUTCHours();
-        renderChart(chart, currentHour);
+        renderDayCard(0);
     } catch (error) {
         showToast("Something went wrong");
 }
@@ -304,6 +346,14 @@ document.addEventListener("click", function(e) {
     if (!e.target.closest(".search-wrapper")) {
         hideSuggestions();
     }
+});
+
+document.querySelector(".forecast-sidebar").addEventListener("click", function(e) {
+    const card = e.target.closest(".forecast-card");
+    if (!card || !dailyData) return;
+    const cards = Array.from(document.querySelectorAll(".forecast-card"));
+    const index = cards.indexOf(card);
+    renderDayCard(index);
 });
 
 let selectedLat = sessionStorage.getItem("lat");
