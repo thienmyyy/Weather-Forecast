@@ -53,11 +53,12 @@ h1 {
 }
 
 #new-city {
-    background: var(--yellow-light);
+    background: var(--yellow-light) url("icons/magnifying_glas.svg") no-repeat 20px center;
+    background-size: 18px 18px;
     border: 1.5px solid #000;
     border-radius: 999px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
-    padding: 0 24px;
+    padding: 0 24px 0 48px;
     height: 57px;
     width: 280px;
     font-family: var(--monoFont);
@@ -208,7 +209,7 @@ h1 {
     padding: 1px 8px 6px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.1s ease;
+    transition: opacity 0.1s ease, left 0.08s ease, top 0.08s ease;
     z-index: 5;
 }
 

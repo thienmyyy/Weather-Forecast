@@ -180,21 +180,29 @@ function positionTooltip(chart, index) {
     tooltipEl.classList.add("show");
 }
 
-function externalTooltipHandler(context) {
-    const { chart, tooltip } = context;
-    const tooltipEl = document.getElementById("chart-tooltip");
-
-    if (tooltip.opacity === 0) {
-        if (pinnedIndex !== null) {
-            positionTooltip(chart, pinnedIndex);
-        } else {
-            tooltipEl.classList.remove("show");
-        }
-        return;
+function handleChartMouseMove(e) {
+    if (!drawChart) return;
+    const points = drawChart.getElementsAtEventForMode(e, "nearest", { intersect: false, axis: "x" }, false);
+    if (points.length > 0) {
+        positionTooltip(drawChart, points[0].index);
+    } else if (pinnedIndex !== null) {
+        positionTooltip(drawChart, pinnedIndex);
+    } else {
+        document.getElementById("chart-tooltip").classList.remove("show");
     }
-
-    positionTooltip(chart, tooltip.dataPoints[0].dataIndex);
 }
+
+function handleChartMouseLeave() {
+    if (!drawChart) return;
+    if (pinnedIndex !== null) {
+        positionTooltip(drawChart, pinnedIndex);
+    } else {
+        document.getElementById("chart-tooltip").classList.remove("show");
+    }
+}
+
+document.getElementById("temp-chart").addEventListener("mousemove", handleChartMouseMove);
+document.getElementById("temp-chart").addEventListener("mouseleave", handleChartMouseLeave);
 
 function renderChart(chart, currentHour){
     const labels = chart.time.slice(0, 24);
@@ -202,7 +210,7 @@ function renderChart(chart, currentHour){
     const temps = chart.temperature_2m.slice(0, 24);
     let tempChart = document.getElementById("temp-chart");
     let c = tempChart.getContext("2d");
-    colors = temps.map((_, i) => i === currentHour ? "rgb(239, 154, 49)" : "rgba(245, 168, 74, 0.7)");
+    colors = temps.map((_, i) => i === currentHour ? "rgb(240, 149, 38)" : "rgba(245, 168, 74, 0.65)");
     pinnedIndex = null;
     document.getElementById("chart-tooltip").classList.remove("show");
     if(drawChart){
@@ -259,15 +267,14 @@ function renderChart(chart, currentHour){
 
             },
             tooltip: {
-                enabled: false,
-                external: externalTooltipHandler
+                enabled: false
   }
         },
         onClick: function(event, elements) {
             if (elements.length > 0) {
                 const index = elements[0].index;
                 pinnedIndex = pinnedIndex === index ? null : index;
-                colors = temps.map((_, i) => i === (pinnedIndex ?? currentHour) ? "rgba(245, 168, 74, 1)" : "rgba(245, 168, 74, 0.7)");
+                colors = temps.map((_, i) => i === (pinnedIndex ?? currentHour) ? "rgb(240, 149, 38)" : "rgba(245, 168, 74, 0.7)");
                 drawChart.data.datasets[0].backgroundColor = colors;
                 drawChart.update();
                 if (pinnedIndex !== null) {

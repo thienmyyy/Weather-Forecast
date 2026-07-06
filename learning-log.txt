@@ -38,4 +38,16 @@ What I learned:
  - padStart is a String method that pads the front up to a total target length — so it belongs on each short piece (wrapped in String(...)), not on the finished string.
  - The getUTC* methods ignore the viewer's machine, so shifting the timestamp by the offset and then reading with getUTC* pins the result to the queried city
 
- 
+5. tolltip hovering problem
+What confused me: When I first implemented the tooltip, I wanted that if I hover over another bar, then the tooltip will appear and then disappear when I stop hovering over it.
+    But the prblem was that after I stopped hovering over a bar the tooltip goes back to the last bar we clicked on, and then when hovering over the next bar, the tooltop appears again.
+    That piggy-backing looked extremely awkward, because it looked like flickering.
+What I tried: My first idea was that the tooltip only appears when i click on it and stays like that. But that would eliminate the hovering part, which I liked.
+What worked: Another alternative was to stop letting Chart.js's own tooltip system decide when to show/hide the tooltip, and just track the mouse myself.
+    I added mousemove and mouseleave listeners directly on the canvas, and used getElementsAtEventForMode() to find whichever bar is closest to the mouse.
+    Then I just move the same tooltip div to that bar's position every time - never hide it and make a new one.
+    On mouseleave, if a bar is pinned (clicked), it repositions back to that bar instead of hiding.
+What I learned:
+- the flicker wasn't caused by hovering itself, it was because on mouseout Chart.js's tooltip fired with opacity: 0, so I hid the tooltip, then in that same callback forced it to reappear at the pinned bar right after -> two visual steps back to back read as a flash
+- getElementsAtEventForMode(e, "nearest", { intersect: false, axis: "x" }, false) finds the closest bar to the mouse's x position even when you're not exactly over it, so there are no dead zones between bars
+- repositioning one persistent element instead of hiding + reshowing means you can add a CSS transition on left/top, so the tooltip actually glides between bars instead of teleporting
