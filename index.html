@@ -57,7 +57,13 @@
                         </div>
                     </div>
                     <p class="chart-label">Temperature throughout the day:</p>
-                    <canvas id="temp-chart"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="temp-chart"></canvas>
+                        <div id="chart-tooltip" class="chart-tooltip">
+                            <span id="chart-tooltip-time" class="chart-tooltip-time"></span>
+                            <span id="chart-tooltip-temp" class="chart-tooltip-temp"></span>
+                        </div>
+                    </div>
                 </section>
                 <aside class="forecast-sidebar">
                     <div class="forecast-card"></div>

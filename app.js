@@ -4,6 +4,8 @@ const suggestionsBox = document.getElementById("city-suggestions");
 let pendingCityName = null;
 let debounceTimer = null;
 let drawChart = null
+let colors = null;
+let pinnedIndex = null;
  const weatherIcons = {
       0: "icons/sunny.svg",
       1: "icons/sunny.svg",
@@ -156,18 +158,53 @@ async function getWeather(lat, lon) {
         document.getElementById("weather-icon").src = weatherIcons[daily.weathercode[0]];
        document.getElementById("uv-index-value").textContent = Math.round(daily.uv_index_max[0]);
         renderForecast(daily);
-        renderChart(chart);
+        const currentHour = new Date((Date.now() / 1000 + data.timezone) * 1000 ).getUTCHours();
+        renderChart(chart, currentHour);
     } catch (error) {
         showToast("Something went wrong");
 }
 }
 
-function renderChart(chart){
+function positionTooltip(chart, index) {
+    const tooltipEl = document.getElementById("chart-tooltip");
+    const meta = chart.getDatasetMeta(0);
+    const bar = meta.data[index];
+    if (!bar) return;
+
+    document.getElementById("chart-tooltip-time").textContent = chart.data.labels[index];
+    document.getElementById("chart-tooltip-temp").textContent = Math.round(chart.data.datasets[0].data[index]) + "°";
+
+    const gap = 10;
+    tooltipEl.style.left = chart.canvas.offsetLeft + bar.x + "px";
+    tooltipEl.style.top = chart.canvas.offsetTop + bar.y - gap + "px";
+    tooltipEl.classList.add("show");
+}
+
+function externalTooltipHandler(context) {
+    const { chart, tooltip } = context;
+    const tooltipEl = document.getElementById("chart-tooltip");
+
+    if (tooltip.opacity === 0) {
+        if (pinnedIndex !== null) {
+            positionTooltip(chart, pinnedIndex);
+        } else {
+            tooltipEl.classList.remove("show");
+        }
+        return;
+    }
+
+    positionTooltip(chart, tooltip.dataPoints[0].dataIndex);
+}
+
+function renderChart(chart, currentHour){
     const labels = chart.time.slice(0, 24);
-    const time = labels.map(word => word.slice(11)); 
+    const time = labels.map(word => word.slice(11));
     const temps = chart.temperature_2m.slice(0, 24);
     let tempChart = document.getElementById("temp-chart");
     let c = tempChart.getContext("2d");
+    colors = temps.map((_, i) => i === currentHour ? "rgb(239, 154, 49)" : "rgba(245, 168, 74, 0.7)");
+    pinnedIndex = null;
+    document.getElementById("chart-tooltip").classList.remove("show");
     if(drawChart){
         drawChart.destroy();
     }
@@ -178,7 +215,7 @@ function renderChart(chart){
           datasets: [{
             label: "Temperature (°C)",
             data: temps,
-            backgroundColor: "rgba(245, 168, 74, 0.7)",
+            backgroundColor: colors,
             borderRadius: 8,
             barPercentage: 0.5,
             hoverBackgroundColor: "rgba(245, 168, 74, 1)"
@@ -219,6 +256,25 @@ function renderChart(chart){
         plugins: {
             legend: {
                 display: false
+
+            },
+            tooltip: {
+                enabled: false,
+                external: externalTooltipHandler
+  }
+        },
+        onClick: function(event, elements) {
+            if (elements.length > 0) {
+                const index = elements[0].index;
+                pinnedIndex = pinnedIndex === index ? null : index;
+                colors = temps.map((_, i) => i === (pinnedIndex ?? currentHour) ? "rgba(245, 168, 74, 1)" : "rgba(245, 168, 74, 0.7)");
+                drawChart.data.datasets[0].backgroundColor = colors;
+                drawChart.update();
+                if (pinnedIndex !== null) {
+                    positionTooltip(drawChart, pinnedIndex);
+                } else {
+                    document.getElementById("chart-tooltip").classList.remove("show");
+                }
             }
         }
       }

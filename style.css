@@ -5,6 +5,7 @@
     --yellow-bg: #f7f791;
     --grey: #7f7f7f;
     --dark-grey: #676767;
+    --light-orange: rgba(245, 168, 74, 0.7);
 }
 
 * {
@@ -99,7 +100,7 @@ h1 {
 .layout {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
 /* ── Weather card ── */
@@ -114,7 +115,7 @@ h1 {
 }
 
 .weather-date-block {
-    margin-bottom: 28px;
+    margin-bottom: 10px;
 }
 
 #date {
@@ -148,13 +149,13 @@ h1 {
 .weather-main {
     display: flex;
     align-items: center;
-    margin-bottom: 36px;
+    margin-bottom: 15px;
 }
 
 .weather-left {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 20px;
     flex: 3;
 }
 
@@ -188,6 +189,67 @@ h1 {
     font-family: var(--monoFont);
     font-size: 1.6rem;
 }
+
+.chart-wrapper {
+    position: relative;
+}
+
+#temp-chart {
+      max-height: 250px;
+  }
+
+.chart-tooltip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -100%);
+    background: var(--light-orange);
+    border-radius: 6px;
+    padding: 1px 8px 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 5;
+}
+
+.chart-tooltip.show {
+    opacity: 1;
+}
+
+.chart-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--light-orange);
+}
+
+.chart-tooltip-time {
+    display: block;
+    font-family: var(--monoFont);
+    font-size: 11px;
+    letter-spacing: -0.66px;
+    line-height: 18px;
+    color: var(--dark-grey);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.chart-tooltip-temp {
+    display: block;
+    font-family: var(--monoFont);
+    font-size: 18px;
+    line-height: 18px;
+    color: #000;
+    white-space: nowrap;
+    text-align: center;
+}
+
 
 .weather-divider {
     width: 1px;
@@ -230,6 +292,7 @@ h1 {
     font-size: 1rem;
     color: var(--grey);
     letter-spacing: 0.03em;
+    margin-bottom: 25px;
 }
 
 /* ── Forecast sidebar ── */
@@ -247,6 +310,7 @@ h1 {
     border-radius: 10px;
     padding: 14px 20px;
     display: flex;
+    flex: 1;
     align-items: center;
     gap: 12px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
@@ -254,7 +318,7 @@ h1 {
 }
 
 .forecast-card:first-child {
-    background: #efc977;
+    background: var(--light-orange);
     border-width: 2px;
 }
 
