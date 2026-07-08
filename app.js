@@ -50,8 +50,28 @@ const weatherDescriptions = {
     95: "stormy", 96: "stormy", 99: "stormy"
 };
 
+const weatherThemes = {
+    3: "theme-cloudy", 45: "theme-cloudy", 48: "theme-cloudy",
+    51: "theme-rainy", 53: "theme-rainy", 55: "theme-rainy",
+    61: "theme-rainy", 63: "theme-rainy", 65: "theme-rainy",
+    80: "theme-rainy", 81: "theme-rainy", 82: "theme-rainy",
+    71: "theme-snowy", 73: "theme-snowy", 75: "theme-snowy",
+    85: "theme-snowy", 86: "theme-snowy",
+    95: "theme-stormy", 96: "theme-stormy", 99: "theme-stormy",
+    2: "theme-partly-cloudy"
+};
+
+function setWeatherTheme(weathercode) {
+    document.body.classList.remove("theme-rainy", "theme-cloudy", "theme-snowy", "theme-stormy", "theme-partly-cloudy");
+    const theme = weatherThemes[weathercode];
+    if (theme) {
+        document.body.classList.add(theme);
+    }
+}
+
 function renderDayCard(index) {
     selectedIndex = index;
+    setWeatherTheme(dailyData.weathercode[index]);
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const date = new Date(dailyData.time[index]);
     const weekday = dayNames[date.getUTCDay()];
@@ -192,6 +212,9 @@ async function getWeather(lat, lon) {
         }
         pendingCityName = null;
 
+        sessionStorage.setItem("lat", lat);
+        sessionStorage.setItem("lon", lon);
+
         dailyData = daily;
         chartData = chart;
         timezoneOffset = data.timezone;
@@ -246,13 +269,19 @@ function handleChartMouseLeave() {
 document.getElementById("temp-chart").addEventListener("mousemove", handleChartMouseMove);
 document.getElementById("temp-chart").addEventListener("mouseleave", handleChartMouseLeave);
 
+function getThemeColor(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
 function renderChart(chart, currentHour){
     const labels = chart.time.slice(0, 24);
     const time = labels.map(word => word.slice(11));
     const temps = chart.temperature_2m.slice(0, 24);
     let tempChart = document.getElementById("temp-chart");
     let c = tempChart.getContext("2d");
-    colors = temps.map((_, i) => i === currentHour ? "rgb(240, 149, 38)" : "rgba(245, 168, 74, 0.65)");
+    const barColor = getThemeColor("--bar-color");
+    const barColorActive = getThemeColor("--bar-color-active");
+    colors = temps.map((_, i) => i === currentHour ? barColorActive : barColor);
     pinnedIndex = null;
     document.getElementById("chart-tooltip").classList.remove("show");
     if(drawChart){
@@ -268,7 +297,7 @@ function renderChart(chart, currentHour){
             backgroundColor: colors,
             borderRadius: 8,
             barPercentage: 0.5,
-            hoverBackgroundColor: "rgba(245, 168, 74, 1)"
+            hoverBackgroundColor: getThemeColor("--bar-color-hover")
           }]
       },
       options: {
@@ -316,7 +345,7 @@ function renderChart(chart, currentHour){
             if (elements.length > 0) {
                 const index = elements[0].index;
                 pinnedIndex = pinnedIndex === index ? null : index;
-                colors = temps.map((_, i) => i === (pinnedIndex ?? currentHour) ? "rgb(240, 149, 38)" : "rgba(245, 168, 74, 0.7)");
+                colors = temps.map((_, i) => i === (pinnedIndex ?? currentHour) ? barColorActive : barColor);
                 drawChart.data.datasets[0].backgroundColor = colors;
                 drawChart.update();
                 if (pinnedIndex !== null) {
@@ -359,8 +388,6 @@ document.querySelector(".forecast-sidebar").addEventListener("click", function(e
 let selectedLat = sessionStorage.getItem("lat");
 let selectedLon = sessionStorage.getItem("lon");
 if (selectedLat && selectedLon) {
-    sessionStorage.removeItem("lat");
-    sessionStorage.removeItem("lon");
     getWeather(selectedLat, selectedLon);
 } else {
     getWeather(52.5244, 13.4105);

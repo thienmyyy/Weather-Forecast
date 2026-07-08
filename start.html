@@ -5,21 +5,23 @@
         <title>Weather Forecast Starting Page</title>
         <script src="script.js" defer></script>
         <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
-    <body>
-        <header>
-            <h1>Weather Forecast</h1>
-        </header>
-        <main>
-            <h2>
-                Type in your city
-            </h2>
-            <img src="" alt="sun">
-            <div class="search-wrapper">
-                <input type="text" id="city" name="city" placeholder="e.g. Berlin" autocomplete="off">
-                <div id="city-suggestions"></div>
+    <body class="start-page">
+        <main class="hero">
+            <img src="icons/Sun.svg" alt="" class="hero-sun">
+            <div class="hero-text">
+                <h1 class="hero-title">Weather<br>Forecast</h1>
+                <p class="hero-subtitle">Type in your city</p>
+                <div class="hero-search">
+                    <div class="search-wrapper">
+                        <input type="text" id="city" name="city" class="hero-input" placeholder="e.g Berlin" autocomplete="off">
+                        <div id="city-suggestions"></div>
+                    </div>
+                    <button id="search-btn" type="button" class="hero-btn">Ok</button>
+                </div>
             </div>
-            <button id="search-btn">Ok</button>
-
         </main>
-    </body>
+    </body></html>

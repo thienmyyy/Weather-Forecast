@@ -1,11 +1,72 @@
 :root {
     --monoFont: "Geist Mono", monospace;
     --fancyFont: "Fraunces", serif;
+    --uiFont: "Albert Sans", sans-serif;
     --yellow-light: #ffffcb;
     --yellow-bg: #f7f791;
     --grey: #7f7f7f;
     --dark-grey: #676767;
     --light-orange: rgba(245, 168, 74, 0.7);
+    --hero-grey: #737160;
+
+    /* ── Weather-state theme (overridden per .theme-* below) ── */
+    --bg: var(--yellow-bg);
+    --surface: var(--yellow-light);
+    --accent-selected: var(--light-orange);
+    --bar-color: rgba(245, 168, 74, 0.65);
+    --bar-color-active: rgb(240, 149, 38);
+    --bar-color-hover: rgba(245, 168, 74, 1);
+    --tooltip-bg: var(--light-orange);
+}
+
+body.theme-rainy {
+    --bg: #b0d7ff;
+    --surface: #dbedff;
+    --accent-selected: rgba(176, 151, 236, 0.48);
+    --bar-color: rgba(176, 151, 236, 0.48);
+    --bar-color-active: rgb(86, 50, 172);
+    --bar-color-hover: rgba(86, 50, 172, 0.75);
+    --tooltip-bg: rgba(86, 50, 172, 0.36);
+}
+
+body.theme-cloudy {
+    --bg: #ccd2da;
+    --surface: #e9eef3;
+    --accent-selected: rgba(108, 134, 167, 0.51);
+    --bar-color: rgba(80, 128, 190, 0.35);
+    --bar-color-active: rgb(80, 128, 190);
+    --bar-color-hover: rgba(80, 128, 190, 0.8);
+    --tooltip-bg: rgba(80, 128, 190, 0.35);
+}
+
+body.theme-snowy {
+    --bg: #dcf2ff;
+    --surface: #f6fcff;
+    --accent-selected: rgba(89, 232, 251, 0.45);
+    --bar-color: rgba(89, 232, 251, 0.45);
+    --bar-color-active: rgb(89, 232, 251);
+    --bar-color-hover: rgba(89, 232, 251, 0.8);
+    --tooltip-bg: rgba(89, 232, 251, 0.45);
+}
+
+body.theme-stormy {
+    --bg: #bea2ff;
+    --surface: #e2d4ff;
+    --accent-selected: rgba(205, 46, 67, 0.46);
+    --bar-color: rgba(205, 46, 67, 0.46);
+    --bar-color-active: rgb(205, 46, 67);
+    --bar-color-hover: rgba(205, 46, 67, 0.8);
+    --tooltip-bg: rgba(205, 46, 67, 0.46);
+}
+
+body.theme-partly-cloudy {
+    --bg: #e7e9ae;
+    --surface: #f8fce3;
+    --accent-selected: rgba(223, 152, 105, 0.43);
+    --bar-color: rgba(223, 152, 105, 0.43);
+    --bar-color-active: rgb(223, 152, 105);
+    --bar-color-hover: rgba(223, 152, 105, 0.8);
+    --tooltip-bg: rgba(223, 152, 105, 0.43);
 }
 
 * {
@@ -15,9 +76,10 @@
 }
 
 body {
-    background-color: var(--yellow-bg);
-    padding: 40px 80px 60px;
+    background-color: var(--bg);
+    padding: 40px 80px;
     font-family: var(--monoFont);
+    transition: background-color 0.4s ease;
 }
 
 /* ── Header ── */
@@ -32,7 +94,7 @@ header {
     width: 57px;
     height: 57px;
     border-radius: 50%;
-    background: var(--yellow-light);
+    background: var(--surface);
     border: 1.5px solid #000;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
     display: flex;
@@ -42,6 +104,7 @@ header {
     flex-shrink: 0;
     text-decoration: none;
     color: #000;
+    transition: background-color 0.4s ease;
 }
 
 h1 {
@@ -53,9 +116,9 @@ h1 {
 }
 
 #new-city {
-    background: var(--yellow-light) url("icons/magnifying_glas.svg") no-repeat 20px center;
+    background: var(--surface) url("icons/magnifying_glas.svg") no-repeat 20px center;
     background-size: 18px 18px;
-    border: 1.5px solid #000;
+    border: 2px solid #000;
     border-radius: 999px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
     padding: 0 24px 0 48px;
@@ -63,7 +126,9 @@ h1 {
     width: 280px;
     font-family: var(--monoFont);
     font-size: 0.95rem;
+    color: var(--grey);
     outline: none;
+    transition: background-color 0.4s ease;
 }
 
 /* ── Suggestions ── */
@@ -108,11 +173,12 @@ h1 {
 .weather-card {
     flex: 1;
     min-width: 0;
-    background: var(--yellow-light);
+    background: var(--surface);
     border: 2px solid #000;
     border-radius: 15px;
     filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.25));
     padding: 32px 40px 40px;
+    transition: background-color 0.4s ease;
 }
 
 .weather-date-block {
@@ -140,10 +206,9 @@ h1 {
 }
 
 #weather-state {
-    font-family: var(--fancyFont);
+    font-family: var(--monoFont);
     font-size: 1.5rem;
     color: var(--grey);
-    font-variation-settings: "SOFT" 0, "WONK" 1;
 }
 
 /* ── Weather main row ── */
@@ -211,12 +276,12 @@ h1 {
     left: 0;
     top: 0;
     transform: translate(-50%, -100%);
-    background: var(--light-orange);
+    background: var(--tooltip-bg);
     border-radius: 6px;
     padding: 1px 8px 6px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.1s ease, left 0.08s ease, top 0.08s ease;
+    transition: opacity 0.1s ease, left 0.08s ease, top 0.08s ease, background-color 0.4s ease;
     z-index: 5;
 }
 
@@ -234,7 +299,8 @@ h1 {
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-top: 8px solid var(--light-orange);
+    border-top: 8px solid var(--tooltip-bg);
+    transition: border-top-color 0.4s ease;
 }
 
 .chart-tooltip-time {
@@ -313,8 +379,8 @@ h1 {
 }
 
 .forecast-card {
-    background: var(--yellow-light);
-    border: 1.5px solid #000;
+    background: var(--surface);
+    border: 2px solid #000;
     border-radius: 10px;
     padding: 14px 20px;
     display: flex;
@@ -324,11 +390,11 @@ h1 {
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
     min-height: 70px;
     cursor: pointer;
+    transition: background-color 0.4s ease;
 }
 
 .forecast-card.selected {
-    background: var(--light-orange);
-    border-width: 2px;
+    background: var(--accent-selected);
 }
 
 .forecast-card img {
@@ -384,4 +450,97 @@ h1 {
 
 #toast.show {
     opacity: 1;
+}
+
+/* ── Start / landing page ── */
+body.start-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    max-width: 1100px;
+    width: 100%;
+    flex-wrap: wrap;
+    margin-left: clamp(0px, 10vw, 150px);
+}
+
+.hero-sun {
+    width: 265px;
+    height: 265px;
+    flex-shrink: 0;
+}
+
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    max-width: 528px;
+    min-width: 280px;
+}
+
+.hero-title {
+    font-family: var(--fancyFont);
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 68px);
+    line-height: 0.94;
+    letter-spacing: 1px;
+    color: #000;
+    margin: 0;
+}
+
+.hero-subtitle {
+    font-family: var(--monoFont);
+    font-weight: 400;
+    font-size: clamp(16px, 1.8vw, 22px);
+    color: var(--hero-grey);
+    margin: 0;
+}
+
+.hero-search {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+.hero-input {
+    background: var(--yellow-light);
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    height: 53px;
+    width: 393px;
+    max-width: 100%;
+    padding: 0 20px;
+    font-family: var(--monoFont);
+    font-size: 24px;
+    color: #000;
+    outline: none;
+}
+
+.hero-input::placeholder {
+    color: var(--hero-grey);
+    opacity: 1;
+}
+
+.hero-btn {
+    background: #000;
+    border: 2px solid #000;
+    border-radius: 9px;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    height: 53px;
+    width: 87px;
+    font-family: var(--uiFont);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--yellow-light);
+    cursor: pointer;
+    flex-shrink: 0;
 }
