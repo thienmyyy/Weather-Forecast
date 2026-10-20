@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Weather Forecast</title>
+        <meta name="description" content="A weather app with hourly temperatures, a 7-day forecast and city search. Built with vanilla JavaScript, Chart.js, OpenWeatherMap and Open-Meteo.">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Weather Forecast">
+        <meta property="og:description" content="Hourly temperatures and a 7-day forecast for any city.">
+        <link rel="icon" type="image/svg+xml" href="icons/Sun.svg">
+        <script src="config.js" defer></script>
+        <script src="shared.js" defer></script>
         <script src="app.js" defer></script>
-        <script src= "https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
         <link rel="stylesheet" href="style.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,10 +20,10 @@
     </head>
     <body>
         <header>
-            <a href="start.html" class="back-btn">←</a>
-            <h1 id="city-name">Berlin, DE</h1>
+            <a href="start.html" class="back-btn" aria-label="Back to start page">←</a>
+            <h1 id="city-name">Loading…</h1>
             <div class="search-wrapper">
-                <input type="text" id="new-city" name="city" placeholder="search another city" autocomplete="off">
+                <input type="text" id="new-city" name="city" placeholder="search another city" aria-label="Search another city" autocomplete="off">
                 <div id="city-suggestions"></div>
             </div>
         </header>
@@ -23,20 +31,20 @@
             <div class="layout">
                 <section class="weather-card">
                     <div class="weather-date-block">
-                        <p id="date">today, 15.05.2025</p>
+                        <p id="date">–</p>
                         <div class="weekday-row">
-                            <h2 id="week-day">Monday</h2>
-                            <p id="weather-state">sunny</p>
+                            <h2 id="week-day">–</h2>
+                            <p id="weather-state"></p>
                         </div>
                     </div>
                     <div class="weather-main">
                         <div class="weather-left">
-                            <img id="weather-icon" src="" alt="weather icon">
+                            <img id="weather-icon" alt="">
                             <div class="temp-block">
-                                <h2 id="current-temp">20°C</h2>
+                                <h2 id="current-temp">–</h2>
                                 <p class="max-min-temps">
-                                    <span id="max-temp">23°</span>
-                                    <span id="min-temp">11°</span>
+                                    <span id="max-temp">–</span>
+                                    <span id="min-temp">–</span>
                                 </p>
                             </div>
                         </div>
@@ -44,15 +52,15 @@
                         <div class="weather-indicators">
                             <div class="indicator-row">
                                 <p class="indicator-label">Humidity:</p>
-                                <p class="indicator-value" id="humidity-value">33%</p>
+                                <p class="indicator-value" id="humidity-value">–</p>
                             </div>
                             <div class="indicator-row">
                                 <p class="indicator-label">Wind:</p>
-                                <p class="indicator-value" id="wind-value">18 km/h</p>
+                                <p class="indicator-value" id="wind-value">–</p>
                             </div>
                             <div class="indicator-row">
                                 <p class="indicator-label">UV INDEX:</p>
-                                <p class="indicator-value" id="uv-index-value">5</p>
+                                <p class="indicator-value" id="uv-index-value">–</p>
                             </div>
                         </div>
                     </div>
@@ -66,16 +74,16 @@
                     </div>
                 </section>
                 <aside class="forecast-sidebar">
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
-                    <div class="forecast-card"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
                 </aside>
             </div>
         </main>
-        <div id="toast"></div>
+        <div id="toast" role="status" aria-live="polite"></div>
     </body>
 </html>
