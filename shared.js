@@ -7,18 +7,22 @@ function showToast(message) {
 }
 
 function cityLabel(city) {
-    return city.state
-        ? `${city.name}, ${city.state}, ${city.country}`
-        : `${city.name}, ${city.country}`;
+    return city.admin1
+        ? `${city.name}, ${city.admin1}, ${city.country_code}`
+        : `${city.name}, ${city.country_code}`;
 }
 
 async function geocodeCity(query) {
-    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`);
+    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=10&language=en`);
     if (!response.ok) throw new Error(`Geocoding failed: ${response.status}`);
-    const results = await response.json();
-    return results.filter((city, index) =>
-        results.findIndex(c => c.name === city.name && c.country === city.country) === index
-    );
+    const data = await response.json();
+    // no matches: the API omits "results". Keep only towns/cities (PPL*), not glaciers, islands or countries
+    const places = (data.results || [])
+        .filter(c => c.feature_code && c.feature_code.startsWith("PPL"))
+        .map(c => ({ name: c.name, admin1: c.admin1, country_code: c.country_code, lat: c.latitude, lon: c.longitude }));
+    return places
+        .filter((c, i) => places.findIndex(p => p.name === c.name && p.country_code === c.country_code && p.admin1 === c.admin1) === i)
+        .slice(0, 5);
 }
 
 function createSuggestionsList(box, onSelect) {
