@@ -7,7 +7,8 @@ let latestSearch = 0;
 function goToCity(city) {
     sessionStorage.setItem("lat", city.lat);
     sessionStorage.setItem("lon", city.lon);
-    window.location.href = "index.html";
+    sessionStorage.setItem("name", cityLabel(city));
+    window.location.href = "weather.html";
 }
 
 function onCitySelected(city) {
