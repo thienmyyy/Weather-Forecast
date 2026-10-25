@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Weather Forecast</title>
+        <meta name="description" content="A weather app with hourly temperatures, a 7-day forecast and city search. Built with vanilla JavaScript, Chart.js, OpenWeatherMap and Open-Meteo.">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Weather Forecast">
+        <meta property="og:description" content="Hourly temperatures and a 7-day forecast for any city.">
+        <link rel="icon" type="image/svg+xml" href="icons/Sun.svg">
+        <script src="shared.js" defer></script>
+        <script src="app.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <a href="index.html" class="back-btn" aria-label="Back to start page">←</a>
+            <h1 id="city-name">Loading…</h1>
+            <div class="search-wrapper">
+                <input type="text" id="new-city" name="city" placeholder="search another city" aria-label="Search another city" autocomplete="off">
+                <div id="city-suggestions"></div>
+            </div>
+        </header>
+        <main>
+            <div class="layout">
+                <section class="weather-card">
+                    <div class="weather-date-block">
+                        <p id="date">–</p>
+                        <div class="weekday-row">
+                            <h2 id="week-day">–</h2>
+                            <p id="weather-state"></p>
+                        </div>
+                    </div>
+                    <div class="weather-main">
+                        <div class="weather-left">
+                            <img id="weather-icon" alt="">
+                            <div class="temp-block">
+                                <h2 id="current-temp">–</h2>
+                                <p class="max-min-temps">
+                                    <span id="max-temp">–</span>
+                                    <span id="min-temp">–</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="weather-divider"></div>
+                        <div class="weather-indicators">
+                            <div class="indicator-row">
+                                <p class="indicator-label">Humidity:</p>
+                                <p class="indicator-value" id="humidity-value">–</p>
+                            </div>
+                            <div class="indicator-row">
+                                <p class="indicator-label">Wind:</p>
+                                <p class="indicator-value" id="wind-value">–</p>
+                            </div>
+                            <div class="indicator-row">
+                                <p class="indicator-label">UV INDEX:</p>
+                                <p class="indicator-value" id="uv-index-value">–</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="chart-label">Temperature throughout the day:</p>
+                    <div class="chart-wrapper">
+                        <canvas id="temp-chart"></canvas>
+                        <div id="chart-tooltip" class="chart-tooltip">
+                            <span id="chart-tooltip-time" class="chart-tooltip-time"></span>
+                            <span id="chart-tooltip-temp" class="chart-tooltip-temp"></span>
+                        </div>
+                    </div>
+                </section>
+                <aside class="forecast-sidebar">
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                    <div class="forecast-card" tabindex="0" role="button"></div>
+                </aside>
+            </div>
+        </main>
+        <div id="toast" role="status" aria-live="polite"></div>
+    </body>
+</html>
