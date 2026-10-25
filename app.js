@@ -1,8 +1,8 @@
 const newCity = document.getElementById("new-city");
 const suggestionsBox = document.getElementById("city-suggestions");
-let pendingCityName = null;
 let hourlyChart = null;
 let pinnedIndex = null;
+let liveHourIndex = null;
 let selectedIndex = 0;
 let dailyData = null;
 let chartData = null;
@@ -127,10 +127,7 @@ function renderDayCard(index) {
 function onCitySelected(city) {
     suggestions.hide();
     newCity.value = "";
-    pendingCityName = cityLabel(city);
-    selectedLat = city.lat;
-    selectedLon = city.lon;
-    getWeather(selectedLat, selectedLon);
+    getWeather(city.lat, city.lon, cityLabel(city));
 }
 
 const suggestions = createSuggestionsList(suggestionsBox, onCitySelected);
@@ -149,10 +146,10 @@ async function searchCity(query) {
 
 async function getForecast(lat, lon) {
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min,uv_index_max,weathercode&timezone=auto`);
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min,uv_index_max,weathercode&timezone=auto`);
         if (!response.ok) throw new Error(`Forecast failed: ${response.status}`);
         const data = await response.json();
-        return {daily:data.daily, chart:data.hourly}; 
+        return {daily: data.daily, chart: data.hourly, current: data.current};
     } catch (error) {
         showToast("Something went wrong");
     }
@@ -192,43 +189,27 @@ function renderForecast(daily) {
     });
 }
 
-async function getWeather(lat, lon) {
+async function getWeather(lat, lon, label) {
     const requestId = ++latestWeatherRequest;
     document.body.classList.add("loading");
     try {
-        const [response, forecast] = await Promise.all([
-            fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`),
-            getForecast(lat, lon)
-        ]);
-        const data = await response.json();
-        if (requestId !== latestWeatherRequest) return;
-
-        if (!response.ok || data.cod != 200) {
-            showToast("City not found");
-            return;
-        }
-
+        const forecast = await getForecast(lat, lon);
         if (!forecast || requestId !== latestWeatherRequest) return;
-        const {daily, chart} = forecast;
+        const {daily, chart, current} = forecast;
 
         newCity.value = "";
-        if(pendingCityName){
-        document.getElementById("city-name").textContent = pendingCityName;
-        }
-        else{
-        document.getElementById("city-name").textContent = data.name + ", " + data.sys.country;
-        }
-        pendingCityName = null;
+        document.getElementById("city-name").textContent = label;
 
         sessionStorage.setItem("lat", lat);
         sessionStorage.setItem("lon", lon);
+        sessionStorage.setItem("name", label);
 
         dailyData = daily;
         chartData = chart;
-        currentActualTemp = data.main.temp;
-        currentHumidity = data.main.humidity;
-        currentWindKmh = Math.round(data.wind.speed * 3.6);
-        currentHourGlobal = new Date((Date.now() / 1000 + data.timezone) * 1000).getUTCHours();
+        currentActualTemp = current.temperature_2m;
+        currentHumidity = current.relative_humidity_2m;
+        currentWindKmh = Math.round(current.wind_speed_10m);
+        currentHourGlobal = Number(current.time.slice(11, 13));
 
         renderForecast(daily);
         renderDayCard(0);
@@ -241,14 +222,16 @@ async function getWeather(lat, lon) {
     }
 }
 
-function positionTooltip(chart, index) {
+function positionTooltip(chart, index, live) {
     const tooltipEl = document.getElementById("chart-tooltip");
     const meta = chart.getDatasetMeta(0);
     const bar = meta.data[index];
     if (!bar) return;
 
-    document.getElementById("chart-tooltip-time").textContent = chart.data.labels[index];
-    document.getElementById("chart-tooltip-temp").textContent = Math.round(chart.data.datasets[0].data[index]) + "°";
+    document.getElementById("chart-tooltip-time").textContent = live ? "now" : chart.data.labels[index];
+    document.getElementById("chart-tooltip-temp").textContent = live
+        ? Math.round(currentActualTemp) + "°"
+        : Math.round(chart.data.datasets[0].data[index]) + "°";
 
     const gap = 10;
     tooltipEl.style.left = chart.canvas.offsetLeft + bar.x + "px";
@@ -256,25 +239,30 @@ function positionTooltip(chart, index) {
     tooltipEl.classList.add("show");
 }
 
-function handleChartMouseMove(e) {
+// what the tooltip shows when nothing is hovered: the pinned bar, else "now" (today only)
+function showDefaultTooltip() {
     if (!hourlyChart) return;
-    const points = hourlyChart.getElementsAtEventForMode(e, "nearest", { intersect: false, axis: "x" }, false);
-    if (points.length > 0) {
-        positionTooltip(hourlyChart, points[0].index);
-    } else if (pinnedIndex !== null) {
+    if (pinnedIndex !== null) {
         positionTooltip(hourlyChart, pinnedIndex);
+    } else if (liveHourIndex !== null) {
+        positionTooltip(hourlyChart, liveHourIndex, true);
     } else {
         document.getElementById("chart-tooltip").classList.remove("show");
     }
 }
 
-function handleChartMouseLeave() {
+function handleChartMouseMove(e) {
     if (!hourlyChart) return;
-    if (pinnedIndex !== null) {
-        positionTooltip(hourlyChart, pinnedIndex);
+    const points = hourlyChart.getElementsAtEventForMode(e, "nearest", { intersect: false, axis: "x" }, false);
+    if (points.length > 0) {
+        positionTooltip(hourlyChart, points[0].index);
     } else {
-        document.getElementById("chart-tooltip").classList.remove("show");
+        showDefaultTooltip();
     }
+}
+
+function handleChartMouseLeave() {
+    showDefaultTooltip();
 }
 
 document.getElementById("temp-chart").addEventListener("mousemove", handleChartMouseMove);
@@ -294,6 +282,8 @@ function renderChart(chart, currentHour){
     const barColorActive = getThemeColor("--bar-color-active");
     let colors = temps.map((_, i) => i === currentHour ? barColorActive : barColor);
     pinnedIndex = null;
+    liveHourIndex = currentHour;
+    let firstDraw = true;
     const minTemp = Math.round(Math.min(...temps));
     const maxTemp = Math.round(Math.max(...temps));
     tempChart.setAttribute("role", "img");
@@ -316,6 +306,15 @@ function renderChart(chart, currentHour){
           }]
       },
       options: {
+        animation: {
+            // show the "now" tooltip once the bars have finished growing, so it sits at the right height
+            onComplete: function() {
+                if (firstDraw) {
+                    firstDraw = false;
+                    showDefaultTooltip();
+                }
+            }
+        },
         scales: {
         y: {
             border:{
@@ -380,8 +379,6 @@ setupCityInput(newCity, suggestions, onCitySelected, debouncedSearch);
 newCity.addEventListener("input", function() {
     if (newCity.value.trim() == ""){
         debouncedSearch.cancel();
-        selectedLat = null;
-        selectedLon = null;
         suggestions.hide();
     }
     else{
@@ -412,10 +409,10 @@ document.querySelector(".forecast-sidebar").addEventListener("keydown", function
     renderDayCard(cards.indexOf(card));
 });
 
-let selectedLat = sessionStorage.getItem("lat");
-let selectedLon = sessionStorage.getItem("lon");
-if (selectedLat && selectedLon) {
-    getWeather(selectedLat, selectedLon);
+const savedLat = sessionStorage.getItem("lat");
+const savedLon = sessionStorage.getItem("lon");
+if (savedLat && savedLon) {
+    getWeather(savedLat, savedLon, sessionStorage.getItem("name") || "Berlin, DE");
 } else {
-    getWeather(52.5244, 13.4105);
+    getWeather(52.5244, 13.4105, "Berlin, DE");
 }
