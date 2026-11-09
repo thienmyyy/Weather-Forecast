@@ -306,6 +306,11 @@ function renderChart(chart, currentHour){
           }]
       },
       options: {
+        maintainAspectRatio: false,
+        // bar positions are only updated after the resize has rendered, so wait a frame
+        onResize: function() {
+            requestAnimationFrame(showDefaultTooltip);
+        },
         animation: {
             // show the "now" tooltip once the bars have finished growing, so it sits at the right height
             onComplete: function() {

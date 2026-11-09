@@ -39,7 +39,7 @@ searchBtn.addEventListener("click", async function () {
 });
 
 async function searchCity(query) {
-    if (!query || query.length < 3) return;
+    if (!query || query.length < 2) return;
     const searchId = ++latestSearch;
     try {
         const unique = await geocodeCity(query);

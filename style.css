@@ -294,11 +294,8 @@ body.loading .weather-card::after {
 
 .chart-wrapper {
     position: relative;
+    height: clamp(180px, 28vw, 280px);
 }
-
-#temp-chart {
-      max-height: 250px;
-  }
 
 .chart-tooltip {
     position: absolute;
@@ -576,7 +573,7 @@ body.start-page {
 }
 
 /* ── Responsive: main weather page ── */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     body {
         padding: 24px 20px;
     }
@@ -603,6 +600,18 @@ body.start-page {
         padding: 24px;
     }
 
+    .forecast-sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .forecast-card {
+        flex: 0 1 calc(50% - 4px);
+    }
+}
+
+@media (max-width: 700px) {
     .weather-main {
         flex-direction: column;
         align-items: flex-start;
@@ -615,16 +624,6 @@ body.start-page {
 
     .weather-indicators {
         width: 100%;
-    }
-
-    .forecast-sidebar {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .forecast-card {
-        flex: 1 1 calc(50% - 8px);
     }
 }
 
@@ -640,6 +639,10 @@ body.start-page {
     #current-temp,
     #max-temp.headline {
         font-size: 2rem;
+    }
+
+    .weather-main {
+        margin-bottom: 28px;
     }
 
     .forecast-card {

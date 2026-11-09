@@ -41,6 +41,7 @@ That setup had two downsides. The OpenWeatherMap API key had to live in client-s
 ## Known limitations
 - The free Open-Meteo API is for non-commercial use and has daily request limits.
 - Search results are limited to towns and cities (countries, islands and glaciers are filtered out), so searching "Germany" returns places named Germany rather than the country.
+- City suggestions need at least 2 letters. The Open-Meteo geocoding API returns nothing for a 1-letter query, only exact name matches for 2 letters, and fuzzy matches from 3 letters on.
 - The big current temperature is a live reading that updates every 15 minutes, while the chart shows one value per full hour, so the two can differ by a degree or so. The chart tooltip labels the live value as "now".
 - Data is loaded once per search and doesn't refresh by itself, so reload the page to get the latest reading.
 - Temperatures are in °C and dates in `dd.mm.yyyy`.
